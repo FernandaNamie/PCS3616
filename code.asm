@@ -1,0 +1,39 @@
+@ 	/0A00
+
+		JP		INIC
+
+TEAS		K		/5445
+
+STAS		K		/5354
+
+E_AS		K		/4520
+
+_XAS		K		/2000
+
+TRAS		K		/0030
+
+INIC		GD	/0000
+
+		AD		TRAS
+
+		MM		_XAS
+
+		LD		TEAS
+
+		PD	/0100
+
+		LD		STAS
+
+		PD	/0100
+
+		LD		E_AS
+
+		PD	/0100
+
+		LD		_XAS
+
+		PD	/0100
+
+		HM		INIC
+
+# INIC

@@ -1,0 +1,616 @@
+;==============================================
+; AMBIENTE DE EXECUCAO
+; Fernanda N. T. Furukita 11257501
+; Victor Hoefling Padula 10770051
+;==============================================
+;
+0000 0102 ; pula para main
+0002 0909 ; ‘tab’ ‘tab’
+0004 4A50 ; JP
+0006 4A5A ; JZ
+0008 4A4E ; JN
+000A 4C56 ; LV
+000C 4144 ; AD
+000E 5342 ; SB
+0010 4D4C ; ML
+0012 4456 ; DV
+0014 4C44 ; LD
+0016 4D4D ; MM
+0018 5343 ; SC
+001A 5253 ; RS
+001C 484D ; HM
+001E 4744 ; GD
+0020 5044 ; PD
+0022 4F53 ; OS
+0024 4B09 ; K ‘tab’
+0026 0004 ; endereço acessado das instruções
+0028 8000 ; instrução load
+002A 0A00 ; endereço de memória
+002C 1000 ; CTE 1000
+002E 0000 ; OPCODE
+0030 0000 ; MNEM
+0032 9000 ; SALVA
+0034 0000 ; VALOR NO ENDEREÇO
+0036 0040 ; endereço do rótulo
+0040 0000; tabela rotulos
+00D0 0000 ; fim tabela
+00D2 2320 ; #espaço
+00D4 FFFF ; -1
+00D6 092F ; tab barra
+00D8 0040 ; ponteiro tabela
+00DA 0040 ; endereço para percorrer toda a tabela
+00DC 0046 ; guarda último endereço escrito
+00DE 0000 ; 1a metade do rótulo não encontrado
+00E0 0000 ; 2a metade do rótulo não encontrado
+00E2 0000 ; OPCODE do rótulo não encontrado
+00E4 0000 ; vira -1 se rótulo não foi encontrado
+00E6 0000 ; endereço da memória desse rótulo não encontrado
+00E8 0A0A ; quebra de linha (duas quebras)
+00EA 0000 ; endereço inicial
+00EC 0A00 ; endereço mínimo (se for menor que isso, dá erro)
+00F8 0000 ; 1a metade do rótulo lido
+00FA 0000 ; 2a metade do rótulo lido
+00FC 0000 ; 1a metade do rotulo
+00FE 0000;  2a metade do rotulo
+0100 4020; @ESPACO
+;
+;MAIN
+0102 3000 ; load zero
+0104 90E4 ; zera variável todo início da main
+0106 A12A ; chama sub-rotina para tratar @
+0108 A200 ; início loop - chama sub-rotina para reconhecer linha
+010A 2124 ; negativo, vai para fim (encerra leitura)
+010C 111E ; zero, vai para caso sem rótulo
+010E A2C0 ; não é nenhum dos outros, vai para caso com rótulo
+0110 A700 ; le tab tab
+0112 5002 ; subtrai tab tab
+0114 1118 ; eh tab tab continua
+0116 0614 ; nao eh tab tab erro de rotulo
+0118 A21E ; o caso com rótulo continua igual o caso sem rótulo
+011A A154 ; le quebra de linha
+011C 0108 ; reinicia loop
+; caso sem rótulo
+011E A21E ; chama sub-rotina sem rótulo
+0120 A154 ; chama quebra de linha
+0122 0108 ; reinicia loop
+; caso fim
+0124 80EA  ; carrega endereço inicial
+0126 9128 ; coloca como nova instrução (é um jump incondicional)
+0128 0000 ; executa o que foi pego do arquivo .asm
+;
+; sub-rotina da primeira linha (@)
+012A 0000 ; retorno
+012C A700; le primeira linha
+012E 5100 ; verifica se é @ESPACO
+0130 1134 ; caso sim, está certo
+0132 060C ; caso não, pula para erro
+0134 A700 ; le tab barra
+0136 50D6 ; verifica se é tab barra mesmo
+0138 113C ; caso sim, continua
+013A 060C ; caso não, erro
+013C A700 ; le 1a parte do endereco da memoria
+013E 9574 ; coloca como CH_IN_A
+0140 A700 ; le 2a parte do endereco da memoria
+0142 9576 ; coloca como CH_IN_B
+0144 A578 ; chama CHTOI
+0146 2600 ; se voltar negativo, vai para erro
+0148 9034 ; salva endereco inicial no endereco da memoria
+014A 90EA ; guarda como endereço inicial também
+014C 50EC ; subtrai  endereço “mínimo”
+014E 260C ; se for negativo, erro
+0150 A154 ; chama quebra de linhas
+0152 B12A ; sai da sub-rotina
+;
+; sub-rotina pula quebras de linha
+0154 0000 ; RET
+0156 A700 ;le linha
+0158 50E8 ; verifica se são quebras de linha
+015A 115E ; caso sim, está certo e sai da sub-rotina
+015C 0622 ; caso não, vai para erro
+015E B154 ; sai da sub-rotina
+;
+;
+; sub-rotina verifica se tem rótulo ou não, ou se é fim
+0200 0000 ; guarda endereço de volta
+0202 A700
+0204 90FC
+0206 5002 ; verifica se é tab tab
+0208 1214 ; carrega caso sem rótulo
+020A 80FC ;
+020C 50D2 ; verifica se é #espaço
+020E 1218 ; carrega caso fim
+0210 3001 ; chama sub-rotina com rótulo
+0212 B200 ; sai da sub-rotina
+0214 3000 ; caso sem rótulo
+0216 B200 ; sai da sub-rotina
+0218  80D4 ; caso fim
+021A B200 ; sai da sub-rotina
+;
+021C 0000
+; sub-rotina caso sem rótulo
+021E 0000 ; guarda endereço de volta
+0220 A700
+0222 9030 ; guarda MNEM
+0224 A300 ; chama op2mnem
+0226 A700
+0228 921C ; guarda dado lido
+022A 50D6 ; verifica se é tab barra
+022C 1236 ; caso constante
+022E 821C ; pega dado lido
+0230 5002 ; verifica se é tab tab
+0232 123A ; caso de rótulo
+0234 0614 ; caso não seja nenhum dos dois, erro
+0236 A23E ; vai para caso de constante
+0238 B21E
+023A A258 ; vai para caso de rótulo
+023C B21E
+;
+; sub-rotina caso de constante
+023E 0000
+0240 A700
+0242 9574 ; guarda como word 1
+0244 0246 ;
+0246 A700
+0248 9576 ; guarda como word 2
+024A A578 ; chama CHTOI
+024C 2622 ; se for negativo, erro
+024E 921C ; guarda como novo dado lido
+0250 402E ; soma com OPCODE
+0252 9034 ; guarda dado que deve ser colocado na memória
+0254 A400 ; chama BOTA
+0256 B23E ; sai da sub-rotina
+;
+; caso de rótulo lido
+0258 0000 ; guarda endereço de retorno
+025A A700
+025C 90F8
+025E A700
+0260 90FA
+0262 3040
+0264 90DA ; reinicia acesso da tabela
+0266 80DA ; início looping - pega endereço de acesso da tabela
+0268 4028 ; monta instrução LOAD
+026A 926C ; coloca como instrução
+026C  0000 ; onde ficará LOAD
+026E 50F8 ; subtrai com primeiro word do rótulo
+0270 127E ; se for igual, compara segundo word
+; caso de não ser igual
+0272 3006 ; pega 0x006
+0274 40DA ; soma com endereço de acesso da tabela
+0276 90DA ; define novo endereço de acesso
+0278 50DC ; subtrai com último endereço para ver se chegou ao fim
+027A 12A0 ; chegou ao fim - caso de rótulo ainda não anotado
+027C 0266 ; pula para reiniciar looping caso não tenha chegado ao fim
+;
+; compara segundo word
+027E 3002 ; pega 0x002
+0280 40DA ; soma com endereço de acesso da tabela
+0282 4028 ; monta instrução LOAD
+0284 9286 ; coloca como instrução
+0286 0000 ; onde ficará LOAD
+0288 50FA ; subtrai com segundo word do rótulo
+028A 128E ; se for igual, achou rótulo
+028C 0272 ; caso de não ser igual
+;
+; achou rótulo
+028E 3004 ; pega 0x004
+0290 40DA ; soma com endereço de acesso da tabela
+0292 4028 ; monta instrução LOAD
+0294 9296 ; coloca como instrução
+0296 0000 ; onde ficará LOAD
+0298 402E ; soma com OPCODE
+029A 9034 ; guarda dado que deve ser colocado na memória
+029C A400 ; chama BOTA
+029E B258 ; sai da sub-rotina
+;
+; caso de rótulo ainda não anotado
+02A0 80E4 ; pega 0x0E4
+02A2 2614 ; vai para erro de rótulo se já for negativo
+02A4 80D4 ; carrega -1
+02A6 90E4 ; coloca em 0x0E4
+02A8 80F8 ; pega rótulo lido
+02AA 90DE ; guarda rótulo lido
+02AC 80FA ; pega rótulo lido
+02AE 90E0 ; guarda rótulo lido
+02B0 802E ; pega OPCODE
+02B2 90E2 ; guarda como OPCODE do rótulo lido
+02B4 802A ; pega endereço
+02B6 90E6 ; guarda como endereço do rótulo lido
+02B8 3002 ; carrega 2
+02BA 402A ; soma com endereco da memoria
+02BC 902A ;
+02BE B258 ; sai da sub-rotina
+;
+;sub-rotina caso c rotulo
+02C0 0000 ; end retorno
+02C2 A700; ler 2a metade
+02C4 90FE ; salvar segunda metade do rotulo
+02C6 A422 ;chama bota na tabela
+02C8 3006 ;
+02CA 40D8 ; soma 6 no ponteiro da tabela
+02CC 90D8 ; salva no ponteiro da tabela
+02CE 90DC ; também guarda como sendo novo último endereço
+02D0 80E4 ; verifica se tem rótulo que ainda não foi encontrado
+02D2 22D6 ; pula se for negativo
+02D4 B2C0 ; sai da função
+;
+; caso negativo - tem rótulo pendente
+02D6 80FC ; carrega rótulo
+02D8 50DE ; subtrai rótulo pendente
+02DA 12DE ; se zero, é correspondente e continua
+02DC B2C0 ; caso não, apenas sai da função
+02DE 80FE ; carrega rótulo
+02E0 50E0 ; subtrai rótulo pendente
+02E2 12E6 ; se zero é correspondente e continua
+02E4  B2C0 ; caso não, apenas sai da função
+02E6 80E6 ; carrega endereço onde deve ser guardada nova instrução
+02E8 4032 ; soma com SALVA
+02EA 92F0 ; guarda como nova instrução
+02EC  80E2 ; carrega OPCODE do rótulo pendente
+02EE  402A ; soma com endereço do rótulo atual
+02F0  0000 ; onde ficará nova instrução
+02F2  3000 ; carrega 0x000
+02F4  90E4 ; reinicia caso de rótulo não ser encontrado
+02F6  B2C0 ; sai da sub-rotina
+    
+
+;
+; sub-rotina MNEM2OP
+0300 0000  ; end retorno
+0302 8030  ; carrega MNEM
+0304 5004  ; SUB JP
+0306 136A  ; Se for JP pula pro carregamento
+;
+0308 8030  ; carrega MNEM
+030A 5006  ; SUB JZ
+030C 1370  ; Se for JZ pula pro carregamento
+;
+030E 8030  ; carrega MNEM
+0310 5008  ; SUB JN
+0312 1378  ; Se for JN pula pro carregamento
+;
+0314 8030  ; carrega MNEM
+0316 500A ; SUB LV
+0318 1380  ; Se for LV pula pro carregamento
+;
+031A 8030  ; carrega MNEM
+031C 500C  ; SUB AD
+031E 1388  ; Se for AD pula pro carregamento
+;
+0320 8030  ; carrega MNEM
+0322 500E  ; SUB SB
+0324 1390  ; Se for SB pula pro carregamento
+;
+0326 8030  ; carrega MNEM
+0328 5010  ; SUB ML
+032A 1398  ; Se for ML pula pro carregamento
+;
+032C 8030  ; carrega MNEM
+032E 5012  ; SUB DV
+0330 13A0  ; Se for DV pula pro carregamento
+;
+0332 8030  ; carrega MNEM
+0334 5014  ; SUB LD
+0336 13A8  ; Se for LD pula pro carregamento
+;
+0338 8030   ; carrega MNEM
+033A 5016  ; SUB MM
+033C 13B0  ; Se for MM pula pro carregamento
+;
+033E 8030  ; carrega MNEM
+0340 5018  ; SUB SC
+0342 13B8  ; Se for SC pula pro carregamento
+;
+0344 8030  ; carrega MNEM
+0346 501A  ; SUB RS
+0348 13C0  ; Se for RS pula pro carregamento
+;
+034A 8030  ; carrega MNEM
+034C 501C  ; SUB HM
+034E 13C8  ; Se for HM pula pro carregamento
+;
+0350 8030  ; carrega MNEM
+0352 501E  ; SUB GD
+0354 13D0  ; Se for GD pula pro carregamento
+;
+0356 8030  ; carrega MNEM
+0358 5020  ; SUB PD
+035A 13D8  ; Se for PD pula pro carregamento
+;
+035C 8030  ; carrega MNEM
+035E 5022  ; SUB OS
+0360 13E0  ; Se for OS pula pro carregamento
+;
+0362 8030  ; carrega MNEM
+0364 5024  ; SUB K tab
+0366 136A  ; Se for K tab pula pro carregamento
+;
+0368 0622 ; vai para erro caso não se encaixe em nenhuma instrução reconhecível
+
+036A 3000  ; eh JP, carrega 0
+036C 902E  ; salva 0 no OPCODE
+036E B300  ; RETORNA
+;
+0370 3001  ; eh JZ, carrega 1
+0372 602C ; ML 1000
+0374 902E  ; salva 1 no OPCODE
+0376 B300  ; RETORNA
+;
+0378 3002  ; eh JN, carrega 2
+037A 602C ; ML 1000
+037C 902E  ; salva 2 no OPCODE
+037E B300  ; RETORNA
+;
+0380 3003  ; eh LV, carrega 3
+0382 602C ; ML 1000
+0384 902E ; salva 3 no OPCODE
+0386 B300  ; RETORNA
+;
+0388 3004  ; eh AD, carrega 4
+038A 602C ; ML 1000
+038C 902E  ; salva 4 no OPCODE
+038E B300  ; RETORNA
+;
+0390 3005  ; eh SB, carrega 5
+0392 602C ; ML 1000
+0394 902E  ; salva 5 no OPCODE
+0396 B300  ; RETORNA
+;
+0398 3006  ; eh ML, carrega 6
+039A 602C ; ML 1000
+039C 902E  ; salva 6 no OPCODE
+039E B300  ; RETORNA
+;
+03A0 3007  ; eh DV, carrega 7
+03A2 602C ; ML 1000
+03A4 902E  ; salva 7 no OPCODE
+03A6 B300  ; RETORNA
+;
+03A8 3008  ; eh LD, carrega 8
+03AA 602C ; ML 1000
+03AC 902E  ; salva 8 no OPCODE
+03AE B300  ; RETORNA
+;
+03B0 3009  ; eh MM, carrega 9
+03B2 602C ; ML 1000
+03B4 902E  ; salvA 9 no OPCODE
+03B6 B300  ; RETORNA
+;
+03B8 300A  ; eh SC, carrega A
+03BA 602C ; ML 1000
+03BC 902E  ; salva A no OPCODE
+03BE B300  ; RETORNA
+;
+03C0 300B  ; eh RS, carrega B
+03C2 602C ; ML 1000
+03C4 902E  ; salva B no OPCODE
+03C6 B300  ; RETORNA
+;
+03C8 300C  ; eh HM, carrega C
+03CA 602C ; ML 1000
+03CC 902E  ; salva C no OPCODE
+03CE B300  ; RETORNA
+;
+03D0 300D  ; eh GD, carrega D
+03D2 602C ; ML 1000
+03D4 902E  ; salva D no OPCODE
+03D6 B300  ; RETORNA
+;
+03D8 300E  ; eh PD, carrega E
+03DA 602C ; ML 1000
+03DC 902E  ; salva E no OPCODE
+03DE B300  ; RETORNA
+;
+03E0 300F ; eh OS, carrega F
+03E2 602C ; ML 1000
+03E4 902E  ; salva F no OPCODE
+03E6 B300  ; RETORNA
+;
+;
+;
+;
+;
+; SUB-ROTINA BOTA
+0400 0000  ; end retorno
+0402 802A  ; carrega endereço
+0404 4032  ; 9000 + endereço
+0406 940A  ; salva na instrução reservada
+0408 8034  ; carrega valor no endereço
+040A 9000  ; inst reservada (salva no endereço)
+040C 3002 ; pega 0x002
+040E 402A ; soma com endereço atual
+0410 902A ; define como novo endereço
+0412 B400  ; RETORNA
+;
+;
+;
+; SUB-ROTINA BOTA na tabela
+0422 0000  ; end retorno
+0424 80D8  ; carrega ponteiro endereço tabela
+0426 4032; 9000 + endereço
+0428 942C ; salva na instrução reservada
+042A 80FC  ; carrega 1a metade do rotulo
+042C 9000  ; inst reservada (salva na tabela)
+042E 3002  ;
+0430 40D8  ; soma 2 no ponteiro da tabela
+0432 4032  ; soma com 9000
+0434 9438 ; salva inst reservada
+0436 80FE  ; Carrega segunda metade do rotulo
+0438 9000  ; salva na tabela
+043A 3004  ;
+043C 40D8  ; soma 4 no ponteiro da tabela
+043E 4032  ; soma com 9000
+0440 9444 ; salva inst reservada
+0442 802A  ; Carrega o endereço em que ficará o rótulo
+0444 9000  ; salva na tabela
+0446 B422  ; RETORNA
+;
+;
+; Parâmetros
+0504 0000 ; WORD $ /0001 ; Word de entrada
+0506 0000 ; UNP_B1 $ /0001 ; Byte mais significativo
+0508 0000 ; UNP_B2 $ /0001 ; Byte menos significativo
+;
+; Constantes
+050a 0100 ; SHIFT K /0100
+050c 0030 ; CH_0 K /0030
+050e 0046 ; CH_F K /0046
+0510 003a ; X_INI K /003A
+0512 0041 ; X_END K /0041
+0514 0007 ; X_DIFF K /0007
+0516 0001 ; ONE K /0001
+0518 ffff ; MINUS_1 K /FFFF
+051a 0000 ; ZERO K /0000
+051c 1000 ; EIGHT K /1000
+051e 0100 ; FOUR K /0100
+0520 0010 ; TWO K /0010
+;
+; Corpo da subrotina
+0522 0000 ; UNPACK $ /0001
+0524 9504 ; MM WORD ; Carrega word. Primeiramente faremos unpack de B2
+0526 650a ; ML SHIFT ; Desloca os bytes para remover 2 primeiros hex
+0528 a538 ; SC RSHIFT2 ; Desloca os bytes menos significativos pro seu lugar
+052a 9508 ; MM UNP_B2 ; Salva resultado
+052c 8504 ; LD WORD ;
+052e a538 ; SC RSHIFT2 ;
+0530 9506 ; MM UNP_B1 ;
+0532 b522 ; RS UNPACK ; Retorna
+;
+; Constantes
+0534 8000 ; FIX K /8000
+0536 0080 ; REFIX K /0080
+; Corpo da subrotina
+0538 0000 ; RSHIFT2 $ /0001
+053a 2540 ; JN NEG ; O número é negativo
+053c 750a ; DV SHIFT ; Retorna os 2 bytes à posição inicial
+053e 0546 ; JP FIM-RS ; Vai para final de RSHIFT2
+0540 5534 ; NEG SB FIX ; Fix do shift em número negativo
+0542 750a ; DV SHIFT ; Shift
+0544 4536 ; AD REFIX ; Fix para voltar número tirado
+0546 b538 ; FIM-RS RS RSHIFT2 ; Retorno
+;
+;; -------------------------------------------------------------------
+;; Subrotina: IS_HEX
+;; -------------------------------------------------------------------
+;
+; Parâmetros
+0548 0000 ; S_HEX $ /0001
+; Corpo da subrotina
+054a 0000 ; IS_HEX $ /0001
+054c 9548 ; MM S_HEX
+; Verifica se < '0'
+054e 550c ; SB CH_0
+0550 255a ; JN NOT_HEX
+; Verifica se > 'f'
+0552 8548 ; LD S_HEX
+0554 550e ; SB CH_F
+0556 5516 ; SB ONE ; we wanna include 'f'
+0558 255e ; JN MIGHTB
+;Não é hex. Retorna -1.
+055a 8518 ; NOT_HEX LD MINUS_1
+055c b54a ; RS IS_HEX
+; Incrementa CH_F decrementado e verifica se é caractere especial.
+055e 8548 ; MIGHTB LD S_HEX
+0560 5510 ; SB X_INI
+0562 256e ; JN YES_HEX
+0564 5514 ; SB X_DIFF
+0566 255a ; JN NOT_HEX
+0568 8548 ; LD S_HEX
+056a 5514 ; SB X_DIFF
+056c b54a ; RS IS_HEX
+056e 8548 ; YES_HEX LD S_HEX
+0570 b54a ; RS IS_HEX
+;
+;-------------------------------------------------------------------
+; Subrotina: CHTOI
+; Converte uma word em hexa para um número inteiro.
+;
+; Exemplo: CHTOI("0010") = 0010 (i.e., 16 em decimal)
+; -------------------------------------------------------------------
+;
+;Parâmetros
+0572 0000 ; CH_ANS $ /0001 ; Variável para guardar resultado
+0574 0000 ; CH_IN_A $ /0001 ; 2 bytes mais significativos (em ASCII)
+0576 0000 ; CH_IN_B $ /0001 ; 2 bytes menos signicativos (em ASCII)
+
+; Corpo da subrotina
+0578 0000 ; CHTOI $ /0001
+; Zera CH_ANS
+057a 851a ; LD ZERO
+057c 9572 ; MM CH_ANS
+; Unpack primeira palavra
+057e 8574 ; LD CH_IN_A
+0580 9504 ; MM WORD
+0582 a522 ; SC UNPACK
+; Processa primeira palavra
+; Processa primeiro byte
+0584 8506 ; LD UNP_B1
+0586 a54a ; SC IS_HEX
+0588 25bc ; JN CH_RET
+058a 550c ; SB CH_0
+058c 651c ; ML EIGHT
+058e 9572 ; MM CH_ANS
+; Processa segundo byte
+0590 8508 ; LD UNP_B2
+0592 a54a ; SC IS_HEX
+0594 25bc ; JN CH_RET
+0596 550c ; SB CH_0
+0598 651e ; ML FOUR
+059a 4572 ; AD CH_ANS
+059c 9572 ; MM CH_ANS
+; Unpack segunda palavra
+059e 8576 ; LD CH_IN_B
+05a0 9504 ; MM WORD
+05a2 a522 ; SC UNPACK
+; Processa segunda palavra
+; Processa primeiro byte
+05a4 8506 ; LD UNP_B1
+05a6 a54a ; SC IS_HEX
+05a8 25bc ; JN CH_RET
+05aa 550c ; SB CH_0
+05ac 6520 ; ML TWO
+05ae 4572 ; AD CH_ANS
+05b0 9572 ; MM CH_ANS
+; Processa segundo byte
+05b2 8508 ; LD UNP_B2
+05b4 a54a ; SC IS_HEX
+05b6 25bc ; JN CH_RET
+05b8 550c ; SB CH_0
+05ba 4572 ; AD CH_ANS
+; Valor da resposta está no acumulador!
+05bc b578 ; CH_RET RS CHTOI
+;
+05FC 4552 ; ER
+05FE 524F ; RO
+; sub rotina caso do erro
+0600 0000  ; endereco retorno
+0602 85FC ; pega ER
+0604 E100 ; imprime
+0606 85FE ; pega RO
+0608 E100 ; imprime
+060A B600 ; retorna
+; ERRO 1 - arroba
+060C A600; chama erro
+060E 3031 ; carrega 1
+0610 E100 ; imprime
+0612 C000 ; encerra
+; ERRO 2 - rótulo
+0614 A600; chama erro
+0616 3032 ; carrega 2
+0618 E100 ; imprime
+061A C000 ; encerra
+; ERRO 3 - comandos
+0622 A600; chama erro
+0624 3033 ; carrega 3
+0626 E100 ; imprime
+0628 C000 ; encerra
+;
+;
+;
+;
+;
+;
+0700 0000 ;
+0702 D300 ;
+0704 E100 ;
+0706 B700 ;
